@@ -4,7 +4,10 @@ services:
     image: nginx:latest
     volumes:
       - ./frontend:/usr/share/nginx/html
-
+  backend: 
+    build: ./backend
+    ports:
+      - "5000:5000"
     
   nginx_proxy:
     image: nginx:latest
@@ -15,7 +18,3 @@ services:
     depends_on:
       - backend
       - frontend  
-  backend: 
-    build: ./backend
-    ports:
-      - "5000:5000"
