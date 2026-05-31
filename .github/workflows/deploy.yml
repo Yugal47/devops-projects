@@ -5,19 +5,19 @@ on:
       - main
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-      - name: Deploy Via ssh
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{secrets.SSH_HOST}}
-          username: ugal_iwari
-          key: ${{secrets.SSH_KEY}}
-          script: |
+      - name: Deploy
+#         uses: appleboy/ssh-action@v1.0.3
+#        with:
+#          host: ${{secrets.SSH_HOST}}
+#          username: ugal_iwari
+#          key: ${{secrets.SSH_KEY}}
+          run: |
             cd /apps/devops-projects
-            git pull
+            git pull origin main
             docker compose up --build -d
 
