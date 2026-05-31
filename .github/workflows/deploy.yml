@@ -6,18 +6,12 @@ on:
 jobs:
   deploy:
     runs-on: self-hosted
-    
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-      - name: Deploy
-#         uses: appleboy/ssh-action@v1.0.3
-#        with:
-#          host: ${{secrets.SSH_HOST}}
-#          username: ugal_iwari
-#          key: ${{secrets.SSH_KEY}}
-          run: |
-            cd /apps/devops-projects
-            git pull origin main
-            docker compose up --build -d
 
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy
+        run: |
+          cd /apps/devops-projects
+          git pull origin main
+          docker compose up --build -d
