@@ -13,10 +13,10 @@ jobs:
       - name: Deploy Via ssh
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{secrets.SSH_KEY}}
-          username: root
+          host: ${{secrets.SSH_HOST}}
+          username: ugal_iwari
           key: ${{secrets.SSH_KEY}}
-          scripts: |
+          script: |
             cd /apps/devops-projects
             git pull
             docker compose up --build -d
