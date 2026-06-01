@@ -1,0 +1,21 @@
+name: Todo application deploy
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'project_2/**'
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy
+        run: |
+          cd /apps/devops-projects/project_2
+          git pull origin main
+          docker compose up --build -d
