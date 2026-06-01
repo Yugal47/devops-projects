@@ -13,5 +13,10 @@ jobs:
       - name: Deploy
         run: |
           cd /apps/devops-projects
+          whoami
+          id
+          pwd
+          echo $GITHUB_WORKSPACE
+          ls -ld $GITHUB_WORKSPACE
           git pull origin main
           docker compose up --build -d
