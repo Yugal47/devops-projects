@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-app-deployment
+  namespace: todo-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo-app-deployment
+  template:
+    metadata:
+      labels:
+        app: todo-app-deployment
+    spec:
+      initContainers:
+      - name: wait-for-mysql
+        image: busybox:1.36
+        command: ['sh', '-c', 'until nc -z -w 2 mysql 3306; do echo waiting for mysql; sleep 2; done;']
+      containers:
+      - name: todo-app-deployment
+        image: yugal47/todoapp:0.1
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MYSQL_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: config
+              key: MYSQL_DATABASE
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: secret
+              key: MYSQL_USER
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: secret
+              key: MYSQL_PASSWORD
+        - name: MYSQL_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: config
+              key: MYSQL_HOST
