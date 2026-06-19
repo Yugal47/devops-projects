@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+spec:
+  matchLabels:
+    app: frontend-deployment
+  template:
+    metadata:
+      app: frontend-deployment
+    spec:
+      containers:
+      - name: frontend
+        image:
+        ports:
+        - containerPort:
+
