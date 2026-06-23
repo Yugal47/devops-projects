@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: ep
+  name: config
+data:
+  db_name: employee_portal
+  db_host: postgres
+  db_port: "5432"
