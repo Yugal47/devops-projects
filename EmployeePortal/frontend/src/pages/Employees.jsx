@@ -11,7 +11,11 @@ function Employees() {
       `/employees?search=${search}`
     );
 
-    setEmployees(res.data);
+    setEmployees(
+      Array.isArray(res.data)
+        ? res.data
+        : res.data?.employees || res.data?.data || []
+    );
   };
 
   useEffect(() => {
@@ -51,10 +55,9 @@ function Employees() {
         </thead>
 
         <tbody>
-          {employees.map((emp) => (
-            <tr key={emp.id}>
-              <td>{emp.id}</td>
-
+	  {Array.isArray(employees) &&
+	    employees.map(emp => (
+              <tr key={emp.id}>
               <td>
                 {emp.first_name} {emp.last_name}
               </td>
