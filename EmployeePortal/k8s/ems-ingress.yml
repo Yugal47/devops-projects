@@ -3,8 +3,6 @@ kind: Ingress
 metadata:
   name: ems-ingress
   namespace: ep
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
   - host: ems.local
