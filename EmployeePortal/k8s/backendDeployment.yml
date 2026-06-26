@@ -30,30 +30,39 @@ spec:
         image: yugal47/employeeportalbackend:latest
         ports:
         - containerPort: 5000
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 5
         env:
-        - name: POSTGRES_DB
+        - name: DB_HOST
           valueFrom:
             configMapKeyRef:
               name: config
-              key: db_name
-        - name: POSTGRES_PORT
+              key: db_host
+
+        - name: DB_PORT
           valueFrom:
             configMapKeyRef:
               name: config
               key: db_port
-        - name: POSTGRES_USERNAME
+
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: config
+              key: db_name
+
+        - name: DB_USER
           valueFrom:
             secretKeyRef:
               name: secret
               key: username
 
-        - name: POSTGRES_PASSWORD
+        - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
               name: secret
               key: password
-        - name: POSTGRES_HOST
-          valueFrom:
-            configMapKeyRef:
-              name: config
-              key: db_host
