@@ -4,7 +4,7 @@ metadata:
   namespace: ep
   name: frontend-dep
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: frontend
@@ -18,3 +18,14 @@ spec:
         image: yugal47/employeeportalfrontend:latest
         ports:
         - containerPort: 80
+      initContainers:
+      - name: wait-for-backend
+        image: busybox:1.36
+        command:
+          - sh
+          - -c
+          - |
+            until wget -qO- http://backend-service:5000/; do
+              echo "Waiting for backend .."
+              sleep 5
+            done
