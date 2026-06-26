@@ -35,8 +35,10 @@ spec:
         volumeMounts:
         - name: postgres-data
           mountPath: /var/lib/postgresql/data
+        - name: postgres-init
+          mountPath: /docker-entrypoint-initdb.d
         env:
-        - name: POSTGRES_USERNAME
+        - name: POSTGRES_USER
           valueFrom:
             secretKeyRef:
               name: secret
@@ -51,11 +53,11 @@ spec:
             configMapKeyRef:
               name: config
               key: db_name
-        - name: POSTGRES_HOST
-          valueFrom:
-            configMapKeyRef:
-              name: config
-              key: db_host
+      volumes:
+      - name: postgres-init
+        configMap:
+          name: postgres-init
+
   volumeClaimTemplates:
   - metadata:
       name: postgres-data
