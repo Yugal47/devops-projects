@@ -1,0 +1,173 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: ep
+  name: postgres
+spec:
+  serviceName: postgres
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:16
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+          initialDelaySeconds: 15
+          periodSeconds: 5
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+        - name: postgres-init
+          mountPath: /docker-entrypoint-initdb.d
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: secret
+              key: username
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: secret
+              key: password
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              name: config
+              key: db_name
+      volumes:
+      - name: postgres-init
+        configMap:
+          name: postgres-init
+
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ep
+  name: backend-dep
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      initContainers:
+      - name: wait-for-postgres
+        image: busybox
+        command:
+        - sh
+        - -c
+        - |
+          until nc -z postgres 5432
+          do
+            echo "Waiting for postgres..."
+            sleep 2
+          done
+      containers:
+      - name: backend
+        image: yugal47/employeeportalbackend:latest
+        ports:
+        - containerPort: 5000
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        env:
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: config
+              key: db_host
+
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: config
+              key: db_port
+
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: config
+              key: db_name
+
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: secret
+              key: username
+
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: secret
+              key: password
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ep
+  name: frontend-dep
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: yugal47/employeeportalfrontend:latest
+        ports:
+        - containerPort: 80
+      initContainers:
+      - name: wait-for-backend
+        image: busybox:1.36
+        command:
+          - sh
+          - -c
+          - |
+            until wget -qO- http://backend-service:5000/; do
+              echo "Waiting for backend .."
+              sleep 5
+            done
